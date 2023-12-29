@@ -50,6 +50,8 @@ func init() {
 }
 
 func main() {
+	/*
+	 */
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
@@ -89,22 +91,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	//+kubebuilder:scaffold:builder
-
-	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
-		setupLog.Error(err, "unable to set up health check")
-		os.Exit(1)
-	}
-	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
-		setupLog.Error(err, "unable to set up ready check")
-		os.Exit(1)
-	}
-
-	setupLog.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "problem running manager")
-		os.Exit(1)
-	}
+	// +kubebuilder:docs-gen:collapse=old stuff
 
 	if err = (&controller.CronJobReconciler{
 		Client: mgr.GetClient(),
@@ -114,6 +101,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	/*
+		We'll also set up webhooks for our type, which we'll talk about next.
+		We just need to add them to the manager.  Since we might want to run
+		the webhooks separately, or not run them when testing our controller
+		locally, we'll put them behind an environment variable.
+
+		We'll just make sure to set `ENABLE_WEBHOOKS=false` when we run locally.
+	*/
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = (&batchv1.CronJob{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "CronJob")
@@ -136,4 +131,5 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+	// +kubebuilder:docs-gen:collapse=old stuff
 }
