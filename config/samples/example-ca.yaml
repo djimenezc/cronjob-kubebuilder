@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: example1
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: webhook1-certificate
+  namespace: example1
+spec:
+  secretName: webhook1-certificate
+  dnsNames:
+    - webhook1.example1
+  issuerRef:
+    name: selfsigned
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned
+  namespace: example1
+spec:
+  selfSigned: {}
