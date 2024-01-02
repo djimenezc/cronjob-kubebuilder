@@ -22,6 +22,8 @@ CONTAINER_TOOL ?= docker
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
+CRD_OPTIONS ?= "crd"
+
 .PHONY: all
 all: build
 
