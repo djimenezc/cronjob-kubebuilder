@@ -1,5 +1,5 @@
 /*
-Copyright 2023.
+Copyright 2023 The Kubernetes authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,32 +13,37 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+// +kubebuilder:docs-gen:collapse=Apache License
 
 package main
 
 import (
 	"flag"
 	"os"
-
-	"tutorial.kubebuilder.io/project/internal/controller"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	kbatchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	batchv1 "tutorial.kubebuilder.io/project/api/v1"
 	batchv2 "tutorial.kubebuilder.io/project/api/v2"
+	"tutorial.kubebuilder.io/project/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
 
+// +kubebuilder:docs-gen:collapse=Imports
+
+/*
+ */
 var (
 	scheme   = runtime.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
@@ -47,11 +52,16 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
+	utilruntime.Must(kbatchv1.AddToScheme(scheme)) // we've added this ourselves
 	utilruntime.Must(batchv1.AddToScheme(scheme))
 	utilruntime.Must(batchv2.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
+// +kubebuilder:docs-gen:collapse=existing setup
+
+/*
+ */
 func main() {
 	/*
 	 */
@@ -94,8 +104,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// +kubebuilder:docs-gen:collapse=old stuff
-
 	if err = (&controller.CronJobReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
@@ -104,13 +112,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	/*
-		We'll also set up webhooks for our type, which we'll talk about next.
-		We just need to add them to the manager.  Since we might want to run
-		the webhooks separately, or not run them when testing our controller
-		locally, we'll put them behind an environment variable.
+	// +kubebuilder:docs-gen:collapse=existing setup
 
-		We'll just make sure to set `ENABLE_WEBHOOKS=false` when we run locally.
+	/*
+		Our existing call to SetupWebhookWithManager registers our conversion webhooks with the manager, too.
 	*/
 	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
 		if err = (&batchv1.CronJob{}).SetupWebhookWithManager(mgr); err != nil {
@@ -123,6 +128,9 @@ func main() {
 		}
 	}
 	//+kubebuilder:scaffold:builder
+
+	/*
+	 */
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
@@ -138,5 +146,5 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
-	// +kubebuilder:docs-gen:collapse=old stuff
+	// +kubebuilder:docs-gen:collapse=existing setup
 }
