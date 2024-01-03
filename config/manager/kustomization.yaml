@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: docker.io/djimenezc/cronjob-controller
-  newTag: 1.0.1
+  newTag: 1.0.2

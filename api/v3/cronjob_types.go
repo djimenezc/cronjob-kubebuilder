@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Kubernetes authors.
+Copyright 2023.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,14 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-// +kubebuilder:docs-gen:collapse=Apache License
 
-/*
- */
-package v1
+package v3
 
-/*
- */
 import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -30,16 +25,19 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// +kubebuilder:docs-gen:collapse=Imports
-
 // CronJobSpec defines the desired state of CronJob
 type CronJobSpec struct {
-	// +kubebuilder:validation:MinLength=0
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
 
+	// Foo is an example field of CronJob. Edit cronjob_types.go to remove/update
 	Message string `json:"message"`
 
 	// The schedule in Cron format, see https://en.wikipedia.org/wiki/Cron.
-	Schedule string `json:"schedule"`
+	Schedule CronSchedule `json:"schedule"`
+
+	/*
+	 */
 
 	// +kubebuilder:validation:Minimum=0
 
@@ -79,7 +77,47 @@ type CronJobSpec struct {
 	// This is a pointer to distinguish between explicit zero and not specified.
 	// +optional
 	FailedJobsHistoryLimit *int32 `json:"failedJobsHistoryLimit,omitempty"`
+
+	//+kubebuilder:docs-gen:collapse=The rest of Spec
 }
+
+/*
+Next, we'll need to define a type to hold our schedule.
+Based on our proposed YAML above, it'll have a field for
+each corresponding Cron "field".
+*/
+
+// describes a Cron schedule.
+type CronSchedule struct {
+	// specifies the minute during which the job executes.
+	// +optional
+	Minute *CronField `json:"minute,omitempty"`
+	// specifies the hour during which the job executes.
+	// +optional
+	Hour *CronField `json:"hour,omitempty"`
+	// specifies the day of the month during which the job executes.
+	// +optional
+	DayOfMonth *CronField `json:"dayOfMonth,omitempty"`
+	// specifies the month during which the job executes.
+	// +optional
+	Month *CronField `json:"month,omitempty"`
+	// specifies the day of the week during which the job executes.
+	// +optional
+	DayOfWeek *CronField `json:"dayOfWeek,omitempty"`
+}
+
+/*
+Finally, we'll define a wrapper type to represent a field.
+We could attach additional validation to this field,
+but for now we'll just use it for documentation purposes.
+*/
+
+// represents a Cron field specifier.
+type CronField string
+
+/*
+All the other types will stay the same as before.
+*/
 
 // ConcurrencyPolicy describes how the job will be handled.
 // Only one of the following concurrent policies may be specified.
@@ -114,23 +152,8 @@ type CronJobStatus struct {
 	LastScheduleTime *metav1.Time `json:"lastScheduleTime,omitempty"`
 }
 
-// +kubebuilder:docs-gen:collapse=old stuff
-
-/*
- Since we'll have more than one version, we'll need to mark a storage version.
- This is the version that the Kubernetes API server uses to store our data.
- We'll chose the v1 version for our project.
-
- We'll use the [`+kubebuilder:storageversion`](/reference/markers/crd.md) to do this.
-
- Note that multiple versions may exist in storage if they were written before
- the storage version changes -- changing the storage version only affects how
- objects are created/updated after the change.
-*/
-
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:storageversion
 
 // CronJob is the Schema for the cronjobs API
 type CronJob struct {
@@ -140,9 +163,6 @@ type CronJob struct {
 	Spec   CronJobSpec   `json:"spec,omitempty"`
 	Status CronJobStatus `json:"status,omitempty"`
 }
-
-/*
- */
 
 //+kubebuilder:object:root=true
 
@@ -157,4 +177,4 @@ func init() {
 	SchemeBuilder.Register(&CronJob{}, &CronJobList{})
 }
 
-// +kubebuilder:docs-gen:collapse=old stuff
+// +kubebuilder:docs-gen:collapse=Other Types

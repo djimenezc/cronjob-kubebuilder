@@ -20,6 +20,7 @@ package main
 import (
 	"flag"
 	"os"
+
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
@@ -36,6 +37,7 @@ import (
 
 	batchv1 "tutorial.kubebuilder.io/project/api/v1"
 	batchv2 "tutorial.kubebuilder.io/project/api/v2"
+	batchv3 "tutorial.kubebuilder.io/project/api/v3"
 	"tutorial.kubebuilder.io/project/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
@@ -55,6 +57,7 @@ func init() {
 	utilruntime.Must(kbatchv1.AddToScheme(scheme)) // we've added this ourselves
 	utilruntime.Must(batchv1.AddToScheme(scheme))
 	utilruntime.Must(batchv2.AddToScheme(scheme))
+	utilruntime.Must(batchv3.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -123,6 +126,10 @@ func main() {
 			os.Exit(1)
 		}
 		if err = (&batchv2.CronJob{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "CronJob")
+			os.Exit(1)
+		}
+		if err = (&batchv3.CronJob{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "CronJob")
 			os.Exit(1)
 		}
