@@ -1,0 +1,30 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ include "cronjob-operator.fullname" . }}-validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "cronjob-operator.fullname" . }}-serving-cert
+  labels:
+  {{- include "cronjob-operator.labels" . | nindent 4 }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: '{{ include "cronjob-operator.fullname" . }}-webhook-service'
+      namespace: '{{ .Release.Namespace }}'
+      path: /validate-batch-tutorial-kubebuilder-io-v1-cronjob
+  failurePolicy: Fail
+  name: vcronjob.kb.io
+  rules:
+  - apiGroups:
+    - batch.tutorial.kubebuilder.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    - DELETE
+    resources:
+    - cronjobs
+  sideEffects: None

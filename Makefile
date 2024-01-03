@@ -200,5 +200,5 @@ $(HELMIFY): $(LOCALBIN)
 
 helm: manifests kustomize clean-build helmify
 	mkdir -p build
-	$(KUSTOMIZE) build config/default | $(HELMIFY) build/cronjob-operator
+	$(KUSTOMIZE) build config/default | $(HELMIFY) helm/cronjob-operator
 
