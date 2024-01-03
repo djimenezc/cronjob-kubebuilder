@@ -153,6 +153,7 @@ $(LOCALBIN):
 ## Tool Binaries
 KUBECTL ?= kubectl
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
+HELMIFY ?= $(LOCALBIN)/helmify
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 
@@ -187,3 +188,17 @@ install-cert-manager:
 .PHONY: undeploy-cert-manager
 delete-cert-manager:
 	kubectl delete -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.3/cert-manager.yaml
+
+.PHONY: clean-build
+clean-build:
+	rm -rf ./build
+
+.PHONY: helmify
+helmify: $(HELMIFY) ## Download helmify locally if necessary.
+$(HELMIFY): $(LOCALBIN)
+	test -s $(LOCALBIN)/helmify || GOBIN=$(LOCALBIN) go install github.com/arttor/helmify/cmd/helmify@latest
+
+helm: manifests kustomize clean-build helmify
+	mkdir -p build
+	$(KUSTOMIZE) build config/default | $(HELMIFY) build/cronjob-operator
+
